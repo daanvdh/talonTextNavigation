@@ -38,6 +38,10 @@ class Actions:
     def extend_left_after(symbol: str, occurrence_number: int):
         """go left until you find the given symbol for the occurrence_number-th time and extent the current selection until after it"""
         extend_left_after(ascii(symbol), int(occurrence_number))
+
+    def select_right(text: str, occurrence_number: int):
+        """go left until you find the given symbol for the occurrence_number-th time and extent the current selection until after it"""
+        select_right(re.escape(text), occurrence_number)
                                 
 def get_text_left():
     actions.edit.extend_line_start()
@@ -89,10 +93,14 @@ def go_left(i):
     for j in range(0, i):
         actions.edit.left()
 
+
+def extend_right(i):
+    for j in range(0, i):
+        actions.edit.extend_right()
+
 def extend_right_or_reselect(current_selection_length, i):
     if i > 0:
-        for j in range(0, i):
-            actions.edit.extend_right()
+        extend_right(i)
     else:
         for j in range(0, current_selection_length):
             actions.edit.extend_right()
@@ -164,3 +172,12 @@ def extend_left_after(symbol, occurrence_number):
     text = get_text_left()
     i = find_index_left(symbol, occurrence_number, text, current_selection_length)    
     extend_left_or_reselect(current_selection_length, i)
+
+def select_right(regex, occurrence_number):
+    text = get_text_right()
+    try:
+        match = next(itertools.islice(re.finditer(regex, text), occurrence_number-1, None))
+    except StopIteration:
+        return 
+    go_right(match.start())
+    extend_right(match.end()-match.start())

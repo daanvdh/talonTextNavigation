@@ -9,3 +9,5 @@ extend [right] before <user.symbol_key> [<number>]: user.extend_right_before(sym
 extend [right] [after] <user.symbol_key> [<number>]: user.extend_right_after(symbol_key, number or 1)
 extend left [before] <user.symbol_key> [<number>]: user.extend_left_before(symbol_key, number or 1)
 extend left after <user.symbol_key> [<number>]: user.extend_left_after(symbol_key, number or 1)
+
+Select <user.text> [<number>]: user.select_right(text, number or 1)
