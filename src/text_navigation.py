@@ -117,7 +117,7 @@ def before(regex, occurrence_number):
     text = get_text_right()
     try:
         # 2 do: remove comments
-        # pick the next interrater, Skip and number of occurrences, get an error iterator given the _WordRegex
+        # pick the next interrater, Skip n number of occurrences, get an iterator given the Regex
         match = next(itertools.islice(re.finditer(regex, text), occurrence_number-1, None))
     except StopIteration:
         return 
@@ -176,7 +176,7 @@ def extend_left_after(symbol, occurrence_number):
 def select_right(regex, occurrence_number):
     text = get_text_right()
     try:
-        match = next(itertools.islice(re.finditer(regex, text), occurrence_number-1, None))
+        match = next(itertools.islice(re.finditer(regex, text, re.IGNORECASE), occurrence_number-1, None))
     except StopIteration:
         return 
     go_right(match.start())
