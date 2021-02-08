@@ -7,9 +7,14 @@ from _ast import Try
 ctx = Context()
 mod = Module()
 
-mod.list("cursor_location", desc="words to start dictating prose, and the formatter they apply")
-mod.list("direction", desc="words to start dictating prose, and the formatter they apply")
-mod.list("navigation_option", desc="words to start dictating prose, and the formatter they apply")
+# With this you can set the maximum number of rows that will be included in the search,
+# for the keywords "above" and "below" in <user direction>   
+max_line_search = 10
+
+mod.list("cursor_location", desc="words to indicate if the cursor should be moved before or after a given reference point")
+mod.list("direction", desc="words to indicate a direction, as in: left, right, above, below")
+mod.list("navigation_option", desc="words to indicate type of navigation, for instance moving or selecting")
+
 ctx.lists["self.cursor_location"] = {"before", "after"}
 ctx.lists["self.direction"] = {"left", "right", "above", "below"}
 ctx.lists["self.navigation_option"] = {"go", "extend", "select", "delete", "cut"}
@@ -26,10 +31,6 @@ def direction(m) -> str:
 def navigation_option(m) -> str:
     "One directional arrow key"
     return m.navigation_option
-
-# With this you can set the maximum number of rows that will be included in the search,
-# for the keywords "above" and "below" in <user direction>   
-max_line_search = 10
 
 @mod.action_class
 class Actions:
