@@ -11,7 +11,7 @@ mod.list("cursor_location", desc="words to start dictating prose, and the format
 mod.list("direction", desc="words to start dictating prose, and the formatter they apply")
 mod.list("navigation_option", desc="words to start dictating prose, and the formatter they apply")
 ctx.lists["self.cursor_location"] = {"before", "after"}
-ctx.lists["self.direction"] = {"left", "right"}
+ctx.lists["self.direction"] = {"left", "right", "above", "below"}
 ctx.lists["self.navigation_option"] = {"go", "extend", "select", "delete", "cut"}
 
 @mod.capture(rule="{self.cursor_location}")
@@ -26,6 +26,10 @@ def direction(m) -> str:
 def navigation_option(m) -> str:
     "One directional arrow key"
     return m.navigation_option
+
+# With this you can set the maximum number of rows that will be included in the search,
+# for the keywords "above" and "below" in <user direction>   
+max_line_search = 10
 
 @mod.action_class
 class Actions:
@@ -82,6 +86,26 @@ def get_text_right():
     actions.edit.left()
     return text
 
+def get_text_up():
+    actions.edit.up()
+    actions.edit.line_end()
+    for j in range(0, max_line_search):
+        actions.edit.extend_up()
+    actions.edit.extend_line_start()
+    text = actions.edit.selected_text()
+    actions.edit.right()
+    return text
+    
+def get_text_down():
+    actions.edit.down()
+    actions.edit.line_start()
+    for j in range(0, max_line_search):
+        actions.edit.extend_down()
+    actions.edit.extend_line_end()
+    text = actions.edit.selected_text()
+    actions.edit.left()
+    return text
+    
 def get_current_selection_size():
     return len(actions.edit.selected_text())
 
@@ -102,17 +126,17 @@ def extend_right(i):
         actions.edit.extend_right()
 
 def navigation(navigation_option, direction, regex, occurrence_number):
-    if direction == "left":
-        navigate_left(navigation_option, regex, occurrence_number)
+    if direction == "left"  or direction == "above":
+        navigate_left(navigation_option, regex, occurrence_number, direction)
     else:
-        navigate_right(navigation_option, regex, occurrence_number)
+        navigate_right(navigation_option, regex, occurrence_number, direction)
 
-def navigate_left(navigation_option, regex, occurrence_number):
+def navigate_left(navigation_option, regex, occurrence_number, direction):
     current_selection_length = get_current_selection_size()
     if current_selection_length > 0: 
         actions.edit.right()
     try:
-        text = get_text_left()
+        text = get_text_left() if direction == "left" else get_text_up()
         subtext = text if current_selection_length <= 0 else text[:-current_selection_length] 
         match = list(re.finditer(regex, subtext, re.IGNORECASE))[-occurrence_number]
         start = match.start() 
@@ -139,12 +163,12 @@ def navigate_left(navigation_option, regex, occurrence_number):
         return 
     return
 
-def navigate_right(navigation_option, regex, occurrence_number):
+def navigate_right(navigation_option, regex, occurrence_number, direction):
     current_selection_length = get_current_selection_size()                
     if current_selection_length > 0: 
         actions.edit.left()
     try:
-        text = get_text_right()
+        text = get_text_right() if direction == "right" else get_text_down()
         sub_text = text[current_selection_length:]
         # pick the next interrater, Skip n number of occurrences, get an iterator given the Regex
         match = next(itertools.islice(re.finditer(regex, sub_text, re.IGNORECASE), occurrence_number-1, None))

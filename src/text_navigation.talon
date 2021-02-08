@@ -21,4 +21,9 @@
 	user.navigation(navigation_option or "go", direction or "right", cursor_location, symbol_key, number or  1)
 <user.navigation_option> [<user.direction>] <user.symbol_key> [<number>]:
 	user.navigation(navigation_option, direction or "right", "after", symbol_key, number or  1)
-	
+
+# alphabet navigation
+[<user.navigation_option>] [<user.direction>] <user.cursor_location> <user.letter> [<number>]:
+	user.navigation(navigation_option or "go", direction or "right", cursor_location, letter, number or  1)
+<user.navigation_option> [<user.direction>] <user.letter> [<number>]:
+	user.navigation(navigation_option, direction or "right", "after", letter, number or  1)	
