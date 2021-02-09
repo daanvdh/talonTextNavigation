@@ -138,6 +138,7 @@ def navigate_left(navigation_option, regex, occurrence_number, direction):
         actions.edit.right()
     try:
         text = get_text_left() if direction == "left" else get_text_up()
+        # only search in the text that was not selected
         subtext = text if current_selection_length <= 0 else text[:-current_selection_length] 
         match = list(re.finditer(regex, subtext, re.IGNORECASE))[-occurrence_number]
         start = match.start() 
@@ -160,6 +161,7 @@ def navigate_left(navigation_option, regex, occurrence_number, direction):
         elif navigation_option == "extend":
             extend_left(len(text) - match.start())
     except IndexError:
+        # put back the old selection, if the search failed
         extend_left(current_selection_length)
         return 
     return
@@ -170,6 +172,7 @@ def navigate_right(navigation_option, regex, occurrence_number, direction):
         actions.edit.left()
     try:
         text = get_text_right() if direction == "right" else get_text_down()
+        # only search in the text that was not selected
         sub_text = text[current_selection_length:]
         # pick the next interrater, Skip n number of occurrences, get an iterator given the Regex
         match = next(itertools.islice(re.finditer(regex, sub_text, re.IGNORECASE), occurrence_number-1, None))
@@ -193,6 +196,7 @@ def navigate_right(navigation_option, regex, occurrence_number, direction):
         elif navigation_option == "extend":
             extend_right(end)
     except StopIteration:
+        # put back the old selection, if the search failed
         extend_right(current_selection_length)
         return
     return 

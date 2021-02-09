@@ -27,3 +27,10 @@
 	user.navigation(navigation_option or "go", direction or "right", cursor_location, letter, number or  1)
 <user.navigation_option> [<user.direction>] <user.letter> [<number>]:
 	user.navigation(navigation_option, direction or "right", "after", letter, number or  1)	
+
+# number navigation
+[<user.navigation_option>] [<user.direction>] <user.cursor_location> <number>:
+	user.navigation(navigation_option or "go", direction or "right", cursor_location, "{number}", 1)
+<user.navigation_option> [<user.direction>] <number>:
+	user.navigation(navigation_option, direction or "right", "after", "{number}", 1)
+	
