@@ -1,8 +1,6 @@
-import time
 import re
 from talon import ctrl, ui, Module, Context, actions, clip
 import itertools
-from _ast import Try
 
 ctx = Context()
 mod = Module()
@@ -19,28 +17,29 @@ mod.list("search_option", desc="words to indicate type of search, for instance m
 ctx.lists["self.cursor_location"] = {
     "before":"BEFORE",
     "after":"AFTER",
+    #DEFAULT is also a valid option as input for this capture, but is not directly accessible for the user. 
     }
 ctx.lists["self.direction"] = {
     "left":"LEFT", 
     "right":"RIGHT", 
-    "above":"ABOVE", 
-    "below":"BELOW",
+    "up":"UP", 
+    "down":"DOWN",
     }
 ctx.lists["self.navigation_option"] = {
-    "go":"GO",
+    "move":"GO",
     "extend":"EXTEND", 
     "select":"SELECT", 
     "delete":"DELETE", 
     "cut":"CUT", 
     "copy":"COPY",
     }
-search_option = {
+search_option_list = {
     "normal": r"\w+",  
     "word": r"\w+",  
     "small":r"[A-Z]?[a-z0-9]+", 
     "big":  r"[\S]+",
     }
-ctx.lists["self.search_option"] = search_option
+ctx.lists["self.search_option"] = search_option_list
 
 @mod.capture(rule="{self.cursor_location}")
 def cursor_location(m) -> str:
@@ -63,52 +62,14 @@ def search_option(m) -> str:
 class Actions:
     def navigation(navigation_option: str, direction: str, cursor_location: str, text: str, occurrence_number: int):
         """go right until you find the given symbol for the occurrence_number-th time and put the cursor before it"""
-        option = navigation_option+" "+cursor_location if navigation_option=="GO" else navigation_option
         # church_that2.Something-another(*&#$^()&*^@#_!@*_!)#*)*&@%?>><":{ and a lot of other words
-        navigation(option, direction, re.compile(re.escape(text), re.IGNORECASE), int(occurrence_number))
+        navigation(navigation_option, direction, cursor_location, re.compile(re.escape(text), re.IGNORECASE), int(occurrence_number))
 
     def navigation_regex(navigation_option: str, direction: str, cursor_location: str, regex: str, occurrence_number: int):
         """go right until you find the given symbol for the occurrence_number-th time and put the cursor before it"""
-        option = navigation_option+" "+cursor_location if navigation_option=="GO" else navigation_option
         # church_that2.Something-another(*&#$^()&*^@#_!@*_!)#*)*&@%?>><":{ and a lot of other words
-        navigation(option, direction, re.compile(regex), int(occurrence_number))
+        navigation(navigation_option, direction, cursor_location, re.compile(regex), int(occurrence_number))
 
-    def move_right_before(symbol: str, occurrence_number: int):
-        """go right until you find the given symbol for the occurrence_number-th time and put the cursor before it"""
-#        before(re.escape(symbol), int(occurrence_number))
-        
-    def move_right_after(symbol: str, occurrence_number: int):
-        """go right until you find the given symbol for the occurrence_number-th time and put the cursor after it"""
-#        after(ascii(symbol), int(occurrence_number))
-
-    def move_left_before(symbol: str, occurrence_number: int):
-        """go left until you find the given symbol for the occurrence_number-th time and put the cursor before it"""
-#        backwards_before(re.escape(symbol), occurrence_number)
-        
-    def move_left_after(symbol: str, occurrence_number: int):
-        """go left until you find the given symbol for the occurrence_number-th time and put the cursor after it"""
-#        backwards_after(ascii(symbol), int(occurrence_number))        
-                        
-    def extend_right_before(symbol: str, occurrence_number: int):
-        """go right until you find the given symbol for the occurrence_number-th time and extent the current selection until before it"""
-#        extend_right_before(ascii(symbol), int(occurrence_number))
-                        
-    def extend_right_after(symbol: str, occurrence_number: int):
-        """go right until you find the given symbol for the occurrence_number-th time and extent the current selection until after it"""
-#        extend_right_after(ascii(symbol), int(occurrence_number))
-
-    def extend_left_before(symbol: str, occurrence_number: int):
-        """go left until you find the given symbol for the occurrence_number-th time and extent the current selection until before it"""
-#        extend_left_before(ascii(symbol), int(occurrence_number))
-
-    def extend_left_after(symbol: str, occurrence_number: int):
-        """go left until you find the given symbol for the occurrence_number-th time and extent the current selection until after it"""
-#        extend_left_after(ascii(symbol), int(occurrence_number))
-
-    def select_right(text: str, occurrence_number: int):
-        """go left until you find the given symbol for the occurrence_number-th time and extent the current selection until after it"""
-#        select_right(re.escape(text), occurrence_number)
-                                
 def get_text_left():
     actions.edit.extend_line_start()
     text = actions.edit.selected_text()
@@ -160,85 +121,127 @@ def extend_right(i):
     for j in range(0, i):
         actions.edit.extend_right()
 
-def navigation(navigation_option, direction, regex, occurrence_number):
-    if direction == "LEFT"  or direction == "ABOVE":
-        navigate_left(navigation_option, regex, occurrence_number, direction)
+def select(direction, start, end, length):
+    if direction == "RIGHT" or direction == "DOWN":
+        go_right(start)
+        extend_right(end-start)    
     else:
-        navigate_right(navigation_option, regex, occurrence_number, direction)
+        go_left(length-end)
+        extend_left(end-start)    
 
-def navigate_left(navigation_option, regex, occurrence_number, direction):
+def navigation(navigation_option, direction, cursor_location, regex, occurrence_number):
+    if direction == "LEFT"  or direction == "UP":
+        navigate_left(navigation_option, cursor_location, regex, occurrence_number, direction)
+    else:
+        navigate_right(navigation_option, cursor_location, regex, occurrence_number, direction)
+
+def navigate_left(navigation_option, cursor_location, regex, occurrence_number, direction):
     current_selection_length = get_current_selection_size()
     if current_selection_length > 0: 
         actions.edit.right()
-    try:
-        text = get_text_left() if direction == "LEFT" else get_text_up()
-        # only search in the text that was not selected
-        subtext = text if current_selection_length <= 0 else text[:-current_selection_length] 
-        match = list(regex.finditer(subtext))[-occurrence_number]
-        start = match.start() 
-        end = match.end()
-        if navigation_option == "GO BEFORE":
-            go_left(len(text)- start)                
-        elif navigation_option == "GO AFTER":
-            go_left(len(text)- end)
-        elif navigation_option == "SELECT":
-            go_left(len(text)- end)                
-            extend_left(end-start)
-        elif navigation_option == "DELETE":
-            go_left(len(text)- end)                
-            extend_left(end-start)
-            actions.edit.delete()
-        elif navigation_option == "CUT":
-            go_left(len(text)- end)                
-            extend_left(end-start)
-            actions.edit.cut()
-        elif navigation_option == "COPY":
-            go_left(len(text)- end)                
-            extend_left(end-start)
-            actions.edit.copy()
-        elif navigation_option == "EXTEND":
-            extend_left(len(text) - match.start())
-    except IndexError:
+    text = get_text_left() if direction == "LEFT" else get_text_up()
+    # only search in the text that was not selected
+    subtext = text if current_selection_length <= 0 else text[:-current_selection_length] 
+    match = match_backwards(regex, occurrence_number, subtext)
+    if match == None:
         # put back the old selection, if the search failed
         extend_left(current_selection_length)
-        return 
-    return
+        return
+    start = match.start() 
+    end = match.end()
+    handle_navigation_option(navigation_option, cursor_location, direction, text, start, end)
 
-def navigate_right(navigation_option, regex, occurrence_number, direction):
+def navigate_right(navigation_option, cursor_location, regex, occurrence_number, direction):
     current_selection_length = get_current_selection_size()                
     if current_selection_length > 0: 
         actions.edit.left()
-    try:
-        text = get_text_right() if direction == "RIGHT" else get_text_down()
-        # only search in the text that was not selected
-        sub_text = text[current_selection_length:]
-        # pick the next interrater, Skip n number of occurrences, get an iterator given the Regex
-        match = next(itertools.islice(regex.finditer(sub_text), occurrence_number-1, None))
-        start = current_selection_length + match.start() 
-        end = current_selection_length + match.end() 
-        if navigation_option == "GO BEFORE":
-            go_right(start)
-        elif navigation_option == "GO AFTER":
-            go_right(end)
-        elif navigation_option == "SELECT":
-            go_right(start)
-            extend_right(end-start)
-        elif navigation_option == "DELETE":
-            go_right(start)
-            extend_right(end-start)
-            actions.edit.delete()
-        elif navigation_option == "CUT":
-            go_right(start)
-            extend_right(end-start)
-            actions.edit.cut()
-        elif navigation_option == "COPY":
-            go_right(start)
-            extend_right(end-start)
-            actions.edit.copy()
-        elif navigation_option == "EXTEND":
-            extend_right(end)
-    except StopIteration:
+    text = get_text_right() if direction == "RIGHT" else get_text_down()
+    # only search in the text that was not selected
+    sub_text = text[current_selection_length:]
+    # pick the next interrater, Skip n number of occurrences, get an iterator given the Regex
+    match = match_forward(regex, occurrence_number, sub_text)
+    if match == None:
         # put back the old selection, if the search failed
         extend_right(current_selection_length)
-        return
-    return 
+        return 
+    start = current_selection_length + match.start() 
+    end = current_selection_length + match.end()
+    handle_navigation_option(navigation_option, cursor_location, direction, text, start, end)
+
+def handle_navigation_option(navigation_option, cursor_location, direction, text, start, end):
+    length = len(text)
+    if navigation_option == "GO":
+        handle_move(direction, cursor_location, start, end, length)
+    elif navigation_option == "SELECT":
+        handle_select(cursor_location, direction, text, start, end, length)
+    elif navigation_option == "DELETE":
+        handle_select(cursor_location, direction, text, start, end, length)
+        actions.edit.delete()
+    elif navigation_option == "CUT":
+        handle_select(cursor_location, direction, text, start, end, length)
+        actions.edit.cut()
+    elif navigation_option == "COPY":
+        handle_select(cursor_location, direction, text, start, end, length)
+        actions.edit.copy()
+    elif navigation_option == "EXTEND":
+        handle_extend(cursor_location, direction, start, end, length)
+        
+def handle_select(cursor_location, direction, text, start, end, length):
+    if cursor_location == "BEFORE":
+        select_left = length - start
+        text_left = text[:-select_left]
+        match2 = match_backwards(re.compile(search_option_list["word"]), 1, text_left)
+        if match2 == None:
+            end = start
+            start = 0
+        else:
+            start = match2.start()
+            end = match2.end()
+    elif cursor_location == "AFTER":
+        text_right = text[end:]
+        match2 = match_forward(re.compile(search_option_list["word"]), 1, text_right)
+        if match2 == None:
+            start = end
+            end = length
+        else:
+            start = end + match2.start()
+            end = end + match2.end()
+    select(direction, start, end, length)
+
+def handle_move(direction, cursor_location, start, end, length):
+    if direction == "RIGHT" or direction == "DOWN":
+        if cursor_location == "BEFORE":
+            go_right(start)    
+        else:
+            go_right(end)
+    else:
+        if cursor_location == "AFTER":
+            go_left(length-end)
+        else:
+            go_left(length-start)
+
+def handle_extend(cursor_location, direction, start, end, length):
+    if direction == "RIGHT" or direction == "DOWN":
+        if cursor_location == "BEFORE":
+            extend_right(start)    
+        else:
+            extend_right(end)
+    else:
+        if cursor_location == "AFTER":
+            extend_left(length-end)
+        else:
+            extend_left(length-start)
+            
+def match_backwards(regex, occurrence_number, subtext):
+    try:
+        match = list(regex.finditer(subtext))[-occurrence_number]
+        return match
+    except IndexError:
+        return 
+    
+def match_forward(regex, occurrence_number, sub_text):
+    try:
+        match = next(itertools.islice(regex.finditer(sub_text), occurrence_number - 1, None))
+        return match
+    except StopIteration:
+        return None
