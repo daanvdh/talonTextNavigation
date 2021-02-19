@@ -34,12 +34,7 @@ ctx.lists["self.cursor_location"] = {
     "after": "AFTER",
     # DEFAULT is also a valid option as input for this capture, but is not directly accessible for the user.
 }
-ctx.lists["self.direction"] = {
-    "left": "LEFT",
-    "right": "RIGHT",
-    "up": "UP",
-    "down": "DOWN",
-}
+
 ctx.lists["self.navigation_option"] = {
     "move": "GO",
     "extend": "EXTEND",
@@ -68,6 +63,7 @@ class Actions:
     ):
         """go right until you find the given symbol for the occurrence_number-th time and put the cursor before it"""
         # church_that2.Something-another(*&#$^()&*^@#_!@*_!)#*)*&@%?>><":{ and a lot of other words
+        direction = direction.upper()
         navigation(
             navigation_option,
             direction,
@@ -85,6 +81,7 @@ class Actions:
     ):
         """go right until you find the given symbol for the occurrence_number-th time and put the cursor before it"""
         # church_that2.Something-another(*&#$^()&*^@#_!@*_!)#*)*&@%?>><":{ and a lot of other words
+        direction = direction.upper()
         navigation(
             navigation_option,
             direction,
@@ -155,7 +152,7 @@ def extend_right(i):
 
 
 def select(direction, start, end, length):
-    if direction.upper() == "RIGHT" or direction.upper() == "DOWN":
+    if direction == "RIGHT" or direction == "DOWN":
         go_right(start)
         extend_right(end - start)
     else:
@@ -164,21 +161,13 @@ def select(direction, start, end, length):
 
 
 def navigation(navigation_option, direction, cursor_location, regex, occurrence_number):
-    if direction.upper() == "LEFT" or direction.upper() == "UP":
+    if direction == "LEFT" or direction == "UP":
         navigate_left(
-            navigation_option,
-            cursor_location,
-            regex,
-            occurrence_number,
-            direction.upper(),
+            navigation_option, cursor_location, regex, occurrence_number, direction,
         )
     else:
         navigate_right(
-            navigation_option,
-            cursor_location,
-            regex,
-            occurrence_number,
-            direction.upper(),
+            navigation_option, cursor_location, regex, occurrence_number, direction,
         )
 
 
