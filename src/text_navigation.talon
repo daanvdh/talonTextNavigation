@@ -1,3 +1,4 @@
+# symbol navigation
 move [{user.arrow_key}] <user.any_alphanumeric_key> [<number_small>]: user.navigation("GO", arrow_key or "RIGHT", "DEFAULT", any_alphanumeric_key, number_small or  1)
 move [{user.arrow_key}] before <user.any_alphanumeric_key> [<number_small>]: user.navigation("GO", arrow_key or "RIGHT", 'BEFORE', any_alphanumeric_key, number_small or  1)
 move [{user.arrow_key}] after <user.any_alphanumeric_key> [<number_small>]: user.navigation("GO", arrow_key or "RIGHT", 'AFTER', any_alphanumeric_key, number_small or  1)
@@ -17,6 +18,27 @@ select [{user.arrow_key}] <user.any_alphanumeric_key> [<number_small>]: user.nav
 select [{user.arrow_key}] before <user.any_alphanumeric_key> [<number_small>]: user.navigation("SELECT", arrow_key or "RIGHT", "BEFORE", any_alphanumeric_key, number_small or  1)
 select [{user.arrow_key}] after <user.any_alphanumeric_key> [<number_small>]: user.navigation("SELECT", arrow_key or "RIGHT", "AFTER", any_alphanumeric_key, number_small or  1)
 
+# number navigation
+move [{user.arrow_key}] numb <number>: user.navigation("GO", arrow_key or "RIGHT", "DEFAULT", "{number}", number_small or  1)
+move [{user.arrow_key}] before numb <number>: user.navigation("GO", arrow_key or "RIGHT", 'BEFORE', "{number}", number_small or  1)
+move [{user.arrow_key}] after numb <number>: user.navigation("GO", arrow_key or "RIGHT", 'AFTER', "{number}", number_small or  1)
+delete [{user.arrow_key}] numb <number>: user.navigation("DELETE", arrow_key or "RIGHT","DEFAULT", "{number}", number_small or  1)
+delete [{user.arrow_key}] before numb <number>: user.navigation("DELETE", arrow_key or "RIGHT", "BEFORE", "{number}", number_small or  1)
+delete [{user.arrow_key}] after numb <number>: user.navigation("DELETE", arrow_key or "RIGHT", "AFTER", "{number}", number_small or  1)
+extend [{user.arrow_key}] numb <number>: user.navigation("EXTEND", arrow_key or "RIGHT", "DEFAULT", "{number}", number_small or  1)
+extend [{user.arrow_key}] before numb <number>: user.navigation("EXTEND", arrow_key or "RIGHT", 'BEFORE', "{number}", number_small or  1)
+extend [{user.arrow_key}] after numb <number>: user.navigation("EXTEND", arrow_key or "RIGHT", 'AFTER', "{number}", number_small or  1)
+cut [{user.arrow_key}] numb <number>: user.navigation("CUT", arrow_key or "RIGHT", "DEFAULT", "{number}", number_small or  1)
+cut [{user.arrow_key}] before numb <number>: user.navigation("CUT", arrow_key or "RIGHT", "BEFORE", "{number}", number_small or  1)
+cut [{user.arrow_key}] after numb <number>: user.navigation("CUT", arrow_key or "RIGHT", "AFTER", "{number}", number_small or  1)
+copy [{user.arrow_key}] numb <number>: user.navigation("COPY", arrow_key or "RIGHT", "DEFAULT", "{number}", number_small or  1)
+copy [{user.arrow_key}] before numb <number>: user.navigation("COPY", arrow_key or "RIGHT", "BEFORE", "{number}", number_small or  1)
+copy [{user.arrow_key}] after numb <number>: user.navigation("COPY", arrow_key or "RIGHT", "AFTER", "{number}", number_small or  1)
+select [{user.arrow_key}] numb <number>: user.navigation("SELECT", arrow_key or "RIGHT", "DEFAULT", "{number}", number_small or  1)
+select [{user.arrow_key}] before numb <number>: user.navigation("SELECT", arrow_key or "RIGHT", "BEFORE", "{number}", number_small or  1)
+select [{user.arrow_key}] after numb <number>: user.navigation("SELECT", arrow_key or "RIGHT", "AFTER", "{number}", number_small or  1)
+
+# search_option navigation
 move [{user.arrow_key}] {user.search_option} [<number_small>]: user.navigation_regex("GO", arrow_key or "RIGHT", "DEFAULT", search_option, number_small or  1)
 move [{user.arrow_key}] before {user.search_option} [<number_small>]: user.navigation_regex("GO", arrow_key or "RIGHT", "BEFORE", search_option, number_small or  1)
 move [{user.arrow_key}] after {user.search_option} [<number_small>]: user.navigation_regex("GO", arrow_key or "RIGHT", "AFTER", search_option, number_small or  1)
@@ -36,6 +58,7 @@ select [{user.arrow_key}] {user.search_option} [<number_small>]: user.navigation
 select [{user.arrow_key}] before {user.search_option} [<number_small>]: user.navigation_regex("SELECT", arrow_key or "RIGHT", "BEFORE", search_option, number_small or  1)
 select [{user.arrow_key}] after {user.search_option} [<number_small>]: user.navigation_regex("SELECT", arrow_key or "RIGHT", "AFTER", search_option, number_small or  1)
 
+# text navigation
 move [{user.arrow_key}] phrase <user.text> [<number_small>]: user.navigation("GO", arrow_key or "RIGHT", "DEFAULT", text, number_small or  1)
 move [{user.arrow_key}] before phrase <user.text> [<number_small>]: user.navigation("GO", arrow_key or "RIGHT", "BEFORE", text, number_small or  1)
 move [{user.arrow_key}] after phrase <user.text> [<number_small>]: user.navigation("GO", arrow_key or "RIGHT", "AFTER", text, number_small or  1)
