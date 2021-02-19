@@ -17,9 +17,7 @@ mod.list(
     "cursor_location",
     desc="words to indicate if the cursor should be moved before or after a given reference point",
 )
-mod.list(
-    "direction", desc="words to indicate a direction, as in: left, right, above, below"
-)
+
 mod.list(
     "navigation_option",
     desc="words to indicate type of navigation, for instance moving or selecting",
